@@ -4,10 +4,10 @@ from socket import socket, AF_INET, SOCK_DGRAM
 
 def main(args):
     s = socket(AF_INET, SOCK_DGRAM)
-    dest_ip = '127.0.0.1'
-    dest_port = 5029
-    #dest_ip = args[0]
-    #dest_port = int(args[1])
+    # dest_ip = '127.0.0.1'
+    # dest_port = 5029
+    dest_ip = args[0]
+    dest_port = int(args[1])
     print "please insert message...\n"
     msg = raw_input()
     if msg == '4':

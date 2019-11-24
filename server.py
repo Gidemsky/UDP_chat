@@ -1,4 +1,6 @@
+
 import sys
+
 from socket import socket, AF_INET, SOCK_DGRAM
 
 
@@ -14,7 +16,7 @@ def msg_check(chat_input):
     words = chat_input.split(" ", 1)
     try:
         num = int(words[0])
-        if num > 0 and num < 4:
+        if 0 < num < 4:
             return [num, words[1]]
         elif num == 4 or num == 5:
             return [num, "nothing"]
@@ -38,7 +40,7 @@ def message_builder(peron):
 
 
 # adds the out going messages per user in the chat
-def add_msg(user_list, msg, cur_user_sender_info):
+def add_msg(user_list, msg, cur_user_sender_info, s):
     cur_user = 0
     for p in user_list:
         if p.info == cur_user_sender_info:
@@ -54,7 +56,7 @@ def add_msg(user_list, msg, cur_user_sender_info):
 
 # the main commands function.
 # it executes the actions depends the user input (1 - 5)
-def cmd_execute(cmd_type, user_msg):
+def cmd_execute(cmd_type, user_msg, people, sender_info, s):
     if cmd_type is 1:
         exist = False
         chat_users = ""
@@ -81,7 +83,7 @@ def cmd_execute(cmd_type, user_msg):
                 break
         new_msg = sender_name + ": " + user_msg
         # add message to all peoples dictionary except sender
-        add_msg(people, new_msg, sender_info)
+        add_msg(people, new_msg, sender_info, s)
     elif cmd_type is 3:
         # changing persons name
         prev_name = ""
@@ -92,7 +94,7 @@ def cmd_execute(cmd_type, user_msg):
                 break
         new_msg = prev_name + " has changed his name to " + user_msg
         # adding a user name changed for everyone else
-        add_msg(people, new_msg, sender_info)
+        add_msg(people, new_msg, sender_info, s)
     elif cmd_type is 4:
         # deletes the information and closes later the its socket
         leaving_user = ""
@@ -102,7 +104,7 @@ def cmd_execute(cmd_type, user_msg):
                 people.remove(p)
         new_msg = leaving_user + " has left the group"
         # adding a new message for everyone else
-        add_msg(people, new_msg, sender_info)
+        add_msg(people, new_msg, sender_info, s)
     elif cmd_type is 5:
         # finding sender
         for p in people:
@@ -112,20 +114,21 @@ def cmd_execute(cmd_type, user_msg):
                 break
 
 
-people = []
-s = socket(AF_INET, SOCK_DGRAM)
-src_ip = '127.0.0.1'
-src_port = 5029
-s.bind((src_ip, src_port))
+def main(args):
+    people = []
+    s = socket(AF_INET, SOCK_DGRAM)
+    src_ip = '0.0.0.0'
+    src_port = int(args[0])
+    s.bind((src_ip, src_port))
 
-while True:
-    data, sender_info = s.recvfrom(2048)
-    msg_list = msg_check(data)
-    if msg_list:
-        cmd_execute(msg_list[0], msg_list[1])
-    else:
-        s.sendto("Illegal request", sender_info)
+    while True:
+        data, sender_info = s.recvfrom(2048)
+        msg_list = msg_check(data)
+        if msg_list:
+            cmd_execute(msg_list[0], msg_list[1], people, sender_info, s)
+        else:
+            s.sendto("Illegal request", sender_info)
 
 
-#if __name__ == "__main__":
-    #main(sys.argv[1:]# )
+if __name__ == "__main__":
+    main(sys.argv[1:])
