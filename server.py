@@ -11,15 +11,31 @@ class Person:
         self.msgs = []
 
 
+def user_exist_check(src_user_info, people):
+    for p in people:
+        if p.info == src_user_info:
+            return True
+    return False
+
+
 # checking if message of the clients are valid
-def msg_check(chat_input):
+def msg_check(chat_input, src_user_info, people):
     words = chat_input.split(" ", 1)
+    is_user_exist = user_exist_check(src_user_info, people)
     try:
         num = int(words[0])
-        if 0 < num < 4:
+        if num == 1:
+            if is_user_exist:
+                return []
             return [num, words[1]]
+        elif num == 2 or num == 3:
+            if is_user_exist:
+                return [num, words[1]]
+            return []
         elif num == 4 or num == 5:
-            return [num, "nothing"]
+            if is_user_exist:
+                return [num, "nothing"]
+            return []
         else:
             return []
     except:
@@ -123,7 +139,7 @@ def main(args):
 
     while True:
         data, sender_info = s.recvfrom(2048)
-        msg_list = msg_check(data)
+        msg_list = msg_check(data, sender_info, people)
         if msg_list:
             cmd_execute(msg_list[0], msg_list[1], people, sender_info, s)
         else:
